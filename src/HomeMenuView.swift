@@ -9,22 +9,33 @@ struct HomeMenuView: View {
             VStack(spacing: 22) {
                 // MARK: - Header
                 VStack(spacing: 8) {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.blue.opacity(0.35), Color.appCyan.opacity(0.15)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                    if let logoImage = AppLogoProvider.uiImage {
+                        Image(uiImage: logoImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 78, height: 78)
+                            .scaleEffect(1.03)
+                            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                            .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
+                            .padding(.top, 8)
+                    } else {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 19, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.blue.opacity(0.35), Color.appCyan.opacity(0.15)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            )
-                            .frame(width: 72, height: 72)
+                                .frame(width: 78, height: 78)
 
-                        Image(systemName: "globe")
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.appCyan)
+                            Image(systemName: "globe")
+                                .font(.system(size: 36, weight: .bold))
+                                .foregroundColor(.appCyan)
+                        }
+                        .padding(.top, 8)
                     }
-                    .padding(.top, 8)
 
                     Text("Capital Trainer")
                         .font(.system(size: 30, weight: .heavy, design: .rounded))

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct QuizPlayView: View {
     @EnvironmentObject var store: GameStore
@@ -135,7 +136,7 @@ struct QuizPlayView: View {
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.center)
                             }
-                            .padding(.bottom, 6)
+                            .padding(.bottom, 13)
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 11)
@@ -193,16 +194,18 @@ struct QuizPlayView: View {
                                     Image(systemName: "building.columns.fill")
                                         .foregroundColor(.white.opacity(0.45))
 
-                                    TextField("Enter capital city...", text: $store.typedText, onCommit: {
-                                        if !store.submissionState.isSubmitted {
-                                            store.submitAnswer()
+                                    AutoFocusTextField(
+                                        text: $store.typedText,
+                                        placeholder: "Enter capital city...",
+                                        isEditable: !store.submissionState.isSubmitted,
+                                        triggerKey: "\(country.id)-\(store.totalAttempts)-\(store.completedCount)-\(store.repeatQueuedCountTotal)",
+                                        onCommit: {
+                                            if !store.submissionState.isSubmitted {
+                                                store.submitAnswer()
+                                            }
                                         }
-                                    })
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .disableAutocorrection(true)
-                                    .autocapitalization(.words)
-                                    .disabled(store.submissionState.isSubmitted)
+                                    )
+                                    .frame(height: 24)
 
                                     if !store.typedText.isEmpty && !store.submissionState.isSubmitted {
                                         Button(action: {
@@ -568,6 +571,96 @@ private struct SubmissionFeedbackView: View {
                     .foregroundColor(.white)
                 }
                 .buttonStyle(PlainButtonStyle())
+            }
+        }
+    }
+}
+
+// MARK: - Auto-Focusing UIKit TextField Wrapper (Automatically shows keyboard whenever typing is active)
+struct AutoFocusTextField: UIViewRepresentable {
+    @Binding var text: String
+    var placeholder: String
+    var isEditable: Bool
+    var triggerKey: String
+    var onCommit: () -> Void
+
+    class Coordinator: NSObject, UITextFieldDelegate {
+        var parent: AutoFocusTextField
+        var lastTriggerKey: String = ""
+        var wasEditable: Bool = false
+
+        init(_ parent: AutoFocusTextField) {
+            self.parent = parent
+        }
+
+        @objc func textDidChange(_ textField: UITextField) {
+            let current = textField.text ?? ""
+            if parent.text != current {
+                parent.text = current
+            }
+        }
+
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            if parent.isEditable {
+                parent.onCommit()
+            }
+            return false
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIView(context: Context) -> UITextField {
+        let textField = UITextField(frame: .zero)
+        textField.delegate = context.coordinator
+        textField.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        textField.textColor = UIColor.white
+        textField.tintColor = UIColor(red: 0.20, green: 0.78, blue: 0.96, alpha: 1.0)
+        textField.autocorrectionType = .no
+        textField.spellCheckingType = .no
+        textField.autocapitalizationType = .words
+        textField.returnKeyType = .done
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholder,
+            attributes: [.foregroundColor: UIColor.white.withAlphaComponent(0.38)]
+        )
+        textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textField.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.textDidChange(_:)),
+            for: .editingChanged
+        )
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            if self.isEditable {
+                textField.becomeFirstResponder()
+            }
+        }
+        return textField
+    }
+
+    func updateUIView(_ uiView: UITextField, context: Context) {
+        context.coordinator.parent = self
+
+        if uiView.text != text {
+            uiView.text = text
+        }
+
+        uiView.isEnabled = isEditable
+
+        let becameEditable = isEditable && !context.coordinator.wasEditable
+        let keyChangedWhileEditable = isEditable && (context.coordinator.lastTriggerKey != triggerKey)
+
+        context.coordinator.wasEditable = isEditable
+        context.coordinator.lastTriggerKey = triggerKey
+
+        if becameEditable || keyChangedWhileEditable {
+            DispatchQueue.main.async {
+                if self.isEditable && !uiView.isFirstResponder {
+                    uiView.becomeFirstResponder()
+                }
             }
         }
     }
