@@ -37,64 +37,6 @@ struct HomeMenuView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // MARK: - Default Input Mode Selector
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(.appCyan)
-                        Text("INPUT MODE (CAN ALSO BE CHANGED IN-GAME)")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(.white.opacity(0.65))
-                    }
-
-                    HStack(spacing: 10) {
-                        ForEach(InputMode.allCases) { mode in
-                            let isSelected = store.inputMode == mode
-                            Button(action: {
-                                HapticsHelper.impact(.light)
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    store.inputMode = mode
-                                }
-                            }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: mode.iconName)
-                                        .font(.system(size: 14, weight: .semibold))
-                                    Text(mode.title)
-                                        .font(.system(size: 14, weight: .bold))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .fill(isSelected ? Color.blue : Color.white.opacity(0.07))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .stroke(isSelected ? Color.appCyan.opacity(0.8) : Color.white.opacity(0.1), lineWidth: 1)
-                                )
-                                .foregroundColor(.white)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-
-                    Text(store.inputMode.description)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.6))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, 18)
-
                 // MARK: - Game Mode Cards
                 VStack(spacing: 16) {
                     // Mode 1: Official Capitals

@@ -5,11 +5,7 @@ final class GameStore: ObservableObject {
     // MARK: - Navigation & Mode State
     @Published var currentScreen: AppScreen = .menu
     @Published var activeMode: GameMode = .official
-    @Published var inputMode: InputMode {
-        didSet {
-            UserDefaults.standard.set(inputMode.rawValue, forKey: Self.inputModeKey)
-        }
-    }
+    @Published var inputMode: InputMode = .strictTyping
 
     // MARK: - Persistent Custom Selection
     @Published var customSelectedIds: Set<String> {
@@ -44,12 +40,7 @@ final class GameStore: ObservableObject {
     private static let lastAccuracyKey = "geogame_last_accuracy_by_mode_v1"
 
     init() {
-        if let savedModeRaw = UserDefaults.standard.string(forKey: Self.inputModeKey),
-           let savedMode = InputMode(rawValue: savedModeRaw) {
-            self.inputMode = savedMode
-        } else {
-            self.inputMode = .strictTyping
-        }
+        self.inputMode = .strictTyping
 
         if let savedIds = UserDefaults.standard.stringArray(forKey: Self.customSelectionKey) {
             self.customSelectedIds = Set(savedIds)
@@ -90,9 +81,14 @@ final class GameStore: ObservableObject {
         return min(100, max(0, Int(ratio.rounded())))
     }
 
+    var displayedProgressCount: Int {
+        let bonus = submissionState.isCorrect ? 1 : 0
+        return min(totalCardsInRound, completedCount + bonus)
+    }
+
     var roundProgressFraction: Double {
         guard totalCardsInRound > 0 else { return 0 }
-        return Double(completedCount) / Double(totalCardsInRound)
+        return Double(displayedProgressCount) / Double(totalCardsInRound)
     }
 
     var customSelectedCountries: [CountryItem] {
@@ -180,6 +176,7 @@ final class GameStore: ObservableObject {
         totalCardsInRound = pool.count
         completedCount = 0
         repeatLaterIds.removeAll()
+        inputMode = .strictTyping
         typedText = ""
         submissionState = .none
 
@@ -240,6 +237,22 @@ final class GameStore: ObservableObject {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 submissionState = .incorrect(userAnswer: rawInput, correctCapital: country.capital)
             }
+        }
+    }
+
+    /// Directly reveal the answer when the user doesn't know the capital (taps the X button next to Check)
+    func giveUpCurrentCard() {
+        guard let country = currentCountry, !submissionState.isSubmitted else { return }
+        totalAttempts += 1
+        wrongAttempts += 1
+        answeredCountryIds.insert(country.id)
+
+        let rawInput = typedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayAnswer = rawInput.isEmpty ? "No Answer" : rawInput
+
+        HapticsHelper.notification(.error)
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            submissionState = .incorrect(userAnswer: displayAnswer, correctCapital: country.capital)
         }
     }
 

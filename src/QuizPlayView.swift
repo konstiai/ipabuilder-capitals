@@ -6,49 +6,31 @@ struct QuizPlayView: View {
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Top Navigation & Progress Header
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 HStack(spacing: 10) {
                     Button(action: {
                         store.returnToMenu()
                     }) {
-                        HStack(spacing: 5) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .bold))
-                            Text("Menu")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Capsule().fill(Color.white.opacity(0.1)))
-                        .foregroundColor(.white)
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 14, weight: .bold))
+                            .frame(width: 34, height: 34)
+                            .background(Circle().fill(Color.white.opacity(0.1)))
+                            .foregroundColor(.white)
                     }
                     .buttonStyle(PlainButtonStyle())
 
                     Spacer()
 
-                    // Progress Pill
-                    HStack(spacing: 8) {
-                        Label("\(store.completedCount)/\(store.totalCardsInRound)", systemImage: "checkmark.circle.fill")
+                    // Progress Pill (Centered, shows only X/Total)
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.caption.weight(.bold))
                             .foregroundColor(.appCyan)
-
-                        if !store.repeatLaterIds.isEmpty {
-                            Text("•")
-                                .foregroundColor(.white.opacity(0.3))
-                            Label("\(store.repeatLaterIds.count) Repeat", systemImage: "arrow.triangle.2.circlepath")
-                                .font(.caption.weight(.bold))
-                                .foregroundColor(.orange)
-                        }
-
-                        if store.totalAttempts > 0 {
-                            Text("•")
-                                .foregroundColor(.white.opacity(0.3))
-                            Text("\(store.accuracyPercentage)%")
-                                .font(.caption.weight(.heavy))
-                                .foregroundColor(store.accuracyPercentage >= 75 ? .green : .yellow)
-                        }
+                        Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 14)
                     .padding(.vertical, 7)
                     .background(Capsule().fill(Color.white.opacity(0.08)))
 
@@ -59,8 +41,8 @@ struct QuizPlayView: View {
                             store.openCustomPicker()
                         }) {
                             Image(systemName: "checklist")
-                                .font(.system(size: 15, weight: .bold))
-                                .padding(8)
+                                .font(.system(size: 14, weight: .bold))
+                                .frame(width: 34, height: 34)
                                 .background(Circle().fill(Color.purple.opacity(0.3)))
                                 .foregroundColor(.white)
                         }
@@ -71,7 +53,7 @@ struct QuizPlayView: View {
                         }) {
                             Image(systemName: "arrow.counterclockwise")
                                 .font(.system(size: 14, weight: .bold))
-                                .padding(8)
+                                .frame(width: 34, height: 34)
                                 .background(Circle().fill(Color.white.opacity(0.1)))
                                 .foregroundColor(.white)
                         }
@@ -99,62 +81,30 @@ struct QuizPlayView: View {
                     }
                 }
                 .frame(height: 6)
-
-                // MARK: - Top Input Mode Toggle (Strict Typing vs Suggestions)
-                HStack(spacing: 8) {
-                    ForEach(InputMode.allCases) { mode in
-                        let isSelected = store.inputMode == mode
-                        Button(action: {
-                            HapticsHelper.impact(.light)
-                            withAnimation(.easeInOut(duration: 0.18)) {
-                                store.inputMode = mode
-                            }
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: mode.iconName)
-                                    .font(.system(size: 12, weight: .bold))
-                                Text(mode.title)
-                                    .font(.system(size: 13, weight: .bold))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(isSelected ? Color.blue.opacity(0.85) : Color.white.opacity(0.06))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .stroke(isSelected ? Color.appCyan : Color.clear, lineWidth: 1)
-                            )
-                            .foregroundColor(isSelected ? .white : .white.opacity(0.65))
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 10)
+            .padding(.top, 6)
+            .padding(.bottom, 8)
 
             // MARK: - Main Scrollable Quiz Area
             ScrollView(showsIndicators: false) {
                 if let country = store.currentCountry {
-                    VStack(spacing: 16) {
-                        // MARK: - Country & Flag Card
-                        VStack(spacing: 12) {
+                    VStack(spacing: 12) {
+                        // MARK: - Compact Country & Flag Card
+                        VStack(spacing: 6) {
                             HStack {
                                 Label(country.continent, systemImage: "globe")
-                                    .font(.caption.weight(.semibold))
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
+                                    .font(.caption2.weight(.semibold))
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 3)
                                     .background(Capsule().fill(Color.white.opacity(0.1)))
                                     .foregroundColor(.white.opacity(0.85))
 
                                 if country.isTerritory {
                                     Text("Territory")
-                                        .font(.caption.weight(.bold))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
+                                        .font(.caption2.weight(.bold))
+                                        .padding(.horizontal, 9)
+                                        .padding(.vertical, 3)
                                         .background(Capsule().fill(Color.appTeal.opacity(0.3)))
                                         .foregroundColor(.appTeal)
                                 }
@@ -163,62 +113,78 @@ struct QuizPlayView: View {
 
                                 if store.repeatLaterIds.contains(country.id) {
                                     Label("Repeat Card", systemImage: "arrow.triangle.2.circlepath")
-                                        .font(.caption.weight(.bold))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
+                                        .font(.caption2.weight(.bold))
+                                        .padding(.horizontal, 9)
+                                        .padding(.vertical, 3)
                                         .background(Capsule().fill(Color.orange.opacity(0.25)))
                                         .foregroundColor(.orange)
                                 }
                             }
 
                             Text(country.flag)
-                                .font(.system(size: 84))
-                                .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
-                                .padding(.top, 2)
+                                .font(.system(size: 52))
+                                .shadow(color: Color.black.opacity(0.3), radius: 6, x: 0, y: 3)
 
-                            VStack(spacing: 4) {
+                            VStack(spacing: 2) {
                                 Text("COUNTRY / TERRITORY")
-                                    .font(.system(size: 11, weight: .bold))
+                                    .font(.system(size: 10, weight: .bold))
                                     .foregroundColor(.white.opacity(0.5))
 
                                 Text(country.name)
-                                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                                    .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.center)
                             }
-                            .padding(.bottom, 4)
                         }
-                        .padding(18)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
                         .frame(maxWidth: .infinity)
                         .background(
-                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
                                 .fill(Color.white.opacity(0.06))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
                                         .stroke(Color.white.opacity(0.12), lineWidth: 1)
                                 )
                         )
 
                         // MARK: - Input Box & Submit Button
                         VStack(alignment: .leading, spacing: 10) {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Text(store.inputMode == .strictTyping
                                      ? "Write the exact capital city:"
-                                     : "Type letters to see matching capitals:")
+                                     : "Type letters to see capitals:")
                                     .font(.caption.weight(.semibold))
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(.white.opacity(0.75))
+                                    .lineLimit(1)
 
                                 Spacer()
 
-                                if store.inputMode == .strictTyping {
-                                    Label("Exact Spelling", systemImage: "checkmark.shield.fill")
-                                        .font(.caption2.weight(.bold))
-                                        .foregroundColor(.appCyan)
-                                } else {
-                                    Label("Autocomplete Active", systemImage: "sparkles")
-                                        .font(.caption2.weight(.bold))
-                                        .foregroundColor(.appCyan)
+                                Button(action: {
+                                    HapticsHelper.impact(.light)
+                                    withAnimation(.easeInOut(duration: 0.18)) {
+                                        store.inputMode = (store.inputMode == .strictTyping) ? .suggestions : .strictTyping
+                                    }
+                                }) {
+                                    HStack(spacing: 5) {
+                                        Image(systemName: store.inputMode == .strictTyping ? "sparkles" : "eye.slash.fill")
+                                            .font(.system(size: 11, weight: .bold))
+                                        Text(store.inputMode == .strictTyping ? "Show Suggestions" : "Hide Suggestions")
+                                            .font(.system(size: 12, weight: .bold))
+                                    }
+                                    .padding(.horizontal, 11)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(store.inputMode == .strictTyping ? Color.blue.opacity(0.32) : Color.appCyan.opacity(0.25))
+                                    )
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(Color.appCyan.opacity(0.85), lineWidth: 1)
+                                    )
+                                    .foregroundColor(.white)
                                 }
+                                .buttonStyle(PlainButtonStyle())
                             }
 
                             HStack(spacing: 10) {
@@ -262,12 +228,12 @@ struct QuizPlayView: View {
                                     Button(action: {
                                         store.submitAnswer()
                                     }) {
-                                        HStack(spacing: 5) {
+                                        HStack(spacing: 4) {
                                             Text("Check")
                                             Image(systemName: "paperplane.fill")
                                         }
-                                        .font(.system(size: 15, weight: .bold))
-                                        .padding(.horizontal, 16)
+                                        .font(.system(size: 14, weight: .bold))
+                                        .padding(.horizontal, 13)
                                         .padding(.vertical, 14)
                                         .background(
                                             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -280,6 +246,25 @@ struct QuizPlayView: View {
                                         .foregroundColor(.white)
                                     }
                                     .disabled(store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                    .buttonStyle(PlainButtonStyle())
+
+                                    // X Button to reveal answer directly without typing
+                                    Button(action: {
+                                        store.giveUpCurrentCard()
+                                    }) {
+                                        Image(systemName: "xmark")
+                                            .font(.system(size: 16, weight: .heavy))
+                                            .frame(width: 44, height: 46)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                    .fill(Color.red.opacity(0.22))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                            .stroke(Color.red.opacity(0.65), lineWidth: 1.2)
+                                                    )
+                                            )
+                                            .foregroundColor(.red)
+                                    }
                                     .buttonStyle(PlainButtonStyle())
                                 }
                             }
