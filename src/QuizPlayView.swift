@@ -22,17 +22,24 @@ struct QuizPlayView: View {
 
                     Spacer()
 
-                    // Centered Progress & Wrong Counter Pills
+                    // Centered Progress, Correct & Wrong Counter Pills
                     HStack(spacing: 8) {
-                        HStack(spacing: 6) {
+                        Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 13)
+                            .padding(.vertical, 7)
+                            .background(Capsule().fill(Color.white.opacity(0.08)))
+
+                        HStack(spacing: 5) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.caption.weight(.bold))
-                                .foregroundColor(.appCyan)
-                            Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
+                                .foregroundColor(.green)
+                            Text("\(store.correctAttempts)")
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                         }
-                        .padding(.horizontal, 13)
+                        .padding(.horizontal, 11)
                         .padding(.vertical, 7)
                         .background(Capsule().fill(Color.white.opacity(0.08)))
 

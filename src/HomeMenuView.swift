@@ -17,7 +17,8 @@ struct HomeMenuView: View {
                             .scaleEffect(1.08)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
-                            .padding(.top, 8)
+                            .padding(.top, 20)
+                            .padding(.bottom, 18)
                     } else {
                         ZStack {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -34,7 +35,8 @@ struct HomeMenuView: View {
                                 .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.appCyan)
                         }
-                        .padding(.top, 8)
+                        .padding(.top, 20)
+                        .padding(.bottom, 18)
                     }
 
                     Text("Capital Trainer")
