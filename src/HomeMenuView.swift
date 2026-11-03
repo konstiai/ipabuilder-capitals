@@ -180,66 +180,68 @@ private struct CustomModeCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Button(action: onStart) {
-                HStack(alignment: .top, spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.white.opacity(0.18))
-                            .frame(width: 50, height: 50)
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .top, spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.18))
+                                .frame(width: 50, height: 50)
 
-                        Image(systemName: GameMode.custom.iconName)
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(GameMode.custom.title)
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                            Image(systemName: GameMode.custom.iconName)
+                                .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
-                            Spacer()
-                            Image(systemName: selectedCount > 0 ? "play.circle.fill" : "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundColor(.white.opacity(0.9))
                         }
 
-                        Text(GameMode.custom.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.82))
-                            .multilineTextAlignment(.leading)
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(GameMode.custom.title)
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Image(systemName: selectedCount > 0 ? "play.circle.fill" : "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundColor(.white.opacity(0.9))
+                            }
+
+                            Text(GameMode.custom.subtitle)
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.82))
+                                .multilineTextAlignment(.leading)
+                        }
                     }
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
 
-            HStack(spacing: 8) {
-                Label(
-                    selectedCount == 0 ? "No capitals selected yet" : "\(selectedCount) Saved in List",
-                    systemImage: "bookmark.fill"
-                )
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Capsule().fill(Color.black.opacity(0.28)))
-                .foregroundColor(.white)
-
-                if let accuracy = lastAccuracy {
-                    Label("Last Score: \(accuracy)%", systemImage: "chart.bar.fill")
+                    HStack(spacing: 8) {
+                        Label(
+                            selectedCount == 0 ? "No capitals selected yet" : "\(selectedCount) Saved in List",
+                            systemImage: "bookmark.fill"
+                        )
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
                         .background(Capsule().fill(Color.black.opacity(0.28)))
                         .foregroundColor(.white)
+
+                        if let accuracy = lastAccuracy {
+                            Label("Last Score: \(accuracy)%", systemImage: "chart.bar.fill")
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Capsule().fill(Color.black.opacity(0.28)))
+                                .foregroundColor(.white)
+                        }
+
+                        Spacer()
+                    }
                 }
-
-                Spacer()
             }
+            .buttonStyle(PlainButtonStyle())
 
-            Divider()
-                .background(Color.white.opacity(0.25))
+            if selectedCount > 0 {
+                Divider()
+                    .background(Color.white.opacity(0.25))
 
-            // Action Buttons for Custom Selection
-            HStack(spacing: 10) {
-                if selectedCount > 0 {
+                // Action Buttons for Custom Selection (only shown once capitals are selected)
+                HStack(spacing: 10) {
                     Button(action: onStart) {
                         HStack(spacing: 6) {
                             Image(systemName: "play.fill")
@@ -252,25 +254,23 @@ private struct CustomModeCardView: View {
                         .foregroundColor(Color(red: 0.35, green: 0.14, blue: 0.68))
                     }
                     .buttonStyle(PlainButtonStyle())
-                }
 
-                Button(action: onEditList) {
-                    HStack(spacing: 6) {
-                        Image(systemName: selectedCount > 0 ? "pencil" : "checklist")
-                        Text(selectedCount > 0 ? "Add / Edit" : "Select Capitals")
+                    Button(action: onEditList) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "pencil")
+                            Text("Add / Edit")
+                        }
+                        .font(.system(size: 14, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.white.opacity(0.2))
+                        )
+                        .foregroundColor(.white)
                     }
-                    .font(.system(size: 14, weight: .bold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(selectedCount > 0 ? 0.2 : 0.95))
-                    )
-                    .foregroundColor(selectedCount > 0 ? .white : Color(red: 0.35, green: 0.14, blue: 0.68))
-                }
-                .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(PlainButtonStyle())
 
-                if selectedCount > 0 {
                     Button(action: onReset) {
                         HStack(spacing: 5) {
                             Image(systemName: "trash.fill")

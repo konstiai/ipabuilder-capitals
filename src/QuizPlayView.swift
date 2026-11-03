@@ -135,6 +135,7 @@ struct QuizPlayView: View {
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.center)
                             }
+                            .padding(.bottom, 6)
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 11)
