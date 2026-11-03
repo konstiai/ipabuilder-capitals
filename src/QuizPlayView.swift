@@ -22,18 +22,32 @@ struct QuizPlayView: View {
 
                     Spacer()
 
-                    // Progress Pill (Centered, shows only X/Total)
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(.appCyan)
-                        Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                    // Centered Progress & Wrong Counter Pills
+                    HStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(.appCyan)
+                            Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(Color.white.opacity(0.08)))
+
+                        HStack(spacing: 5) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(.red)
+                            Text("\(store.wrongAttempts)")
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(Color.white.opacity(0.08)))
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 7)
-                    .background(Capsule().fill(Color.white.opacity(0.08)))
 
                     Spacer()
 

@@ -13,14 +13,14 @@ struct HomeMenuView: View {
                         Image(uiImage: logoImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 78, height: 78)
-                            .scaleEffect(1.03)
-                            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                            .frame(width: 66, height: 66)
+                            .scaleEffect(1.08)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
                             .padding(.top, 8)
                     } else {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 19, style: .continuous)
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(
                                     LinearGradient(
                                         colors: [Color.blue.opacity(0.35), Color.appCyan.opacity(0.15)],
@@ -28,10 +28,10 @@ struct HomeMenuView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 78, height: 78)
+                                .frame(width: 66, height: 66)
 
                             Image(systemName: "globe")
-                                .font(.system(size: 36, weight: .bold))
+                                .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.appCyan)
                         }
                         .padding(.top, 8)
