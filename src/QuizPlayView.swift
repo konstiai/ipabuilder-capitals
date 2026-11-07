@@ -3,386 +3,521 @@ import UIKit
 
 struct QuizPlayView: View {
     @EnvironmentObject var store: GameStore
+    @State private var showContinentPicker: Bool = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // MARK: - Top Navigation & Progress Header
-            VStack(spacing: 8) {
-                HStack(spacing: 10) {
-                    Button(action: {
-                        store.returnToMenu()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 14, weight: .bold))
-                            .frame(width: 34, height: 34)
-                            .background(Circle().fill(Color.white.opacity(0.1)))
-                            .foregroundColor(.white)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+        ZStack {
+            VStack(spacing: 0) {
+                // MARK: - Top Navigation & Progress Header
+                VStack(spacing: 8) {
+                    ZStack {
+                        // Center: Progress (X/Total), Correct (Green Check), Wrong (Red Cross)
+                        HStack(spacing: 7) {
+                            Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(Capsule().fill(Color.white.opacity(0.08)))
 
-                    Spacer()
-
-                    // Centered Progress, Correct & Wrong Counter Pills
-                    HStack(spacing: 8) {
-                        Text("\(store.displayedProgressCount)/\(store.totalCardsInRound)")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 13)
+                            HStack(spacing: 5) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundColor(.green)
+                                Text("\(store.correctAttempts)")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 10)
                             .padding(.vertical, 7)
                             .background(Capsule().fill(Color.white.opacity(0.08)))
 
-                        HStack(spacing: 5) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.caption.weight(.bold))
-                                .foregroundColor(.green)
-                            Text("\(store.correctAttempts)")
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 11)
-                        .padding(.vertical, 7)
-                        .background(Capsule().fill(Color.white.opacity(0.08)))
-
-                        HStack(spacing: 5) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.caption.weight(.bold))
-                                .foregroundColor(.red)
-                            Text("\(store.wrongAttempts)")
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 11)
-                        .padding(.vertical, 7)
-                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                    }
-
-                    Spacer()
-
-                    if store.activeMode == .custom {
-                        Button(action: {
-                            store.openCustomPicker()
-                        }) {
-                            Image(systemName: "checklist")
-                                .font(.system(size: 14, weight: .bold))
-                                .frame(width: 34, height: 34)
-                                .background(Circle().fill(Color.purple.opacity(0.3)))
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    } else {
-                        Button(action: {
-                            store.restartCurrentMode()
-                        }) {
-                            Image(systemName: "arrow.counterclockwise")
-                                .font(.system(size: 14, weight: .bold))
-                                .frame(width: 34, height: 34)
-                                .background(Circle().fill(Color.white.opacity(0.1)))
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-
-                // Progress Bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.white.opacity(0.1))
-                            .frame(height: 6)
-
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.appCyan, Color.blue],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: max(6, geo.size.width * CGFloat(store.roundProgressFraction)), height: 6)
-                            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: store.roundProgressFraction)
-                    }
-                }
-                .frame(height: 6)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 6)
-            .padding(.bottom, 8)
-
-            // MARK: - Main Scrollable Quiz Area
-            ScrollView(showsIndicators: false) {
-                if let country = store.currentCountry {
-                    VStack(spacing: 12) {
-                        // MARK: - Compact Country & Flag Card
-                        VStack(spacing: 6) {
-                            HStack {
-                                Label(country.continent, systemImage: "globe")
-                                    .font(.caption2.weight(.semibold))
-                                    .padding(.horizontal, 9)
-                                    .padding(.vertical, 3)
-                                    .background(Capsule().fill(Color.white.opacity(0.1)))
-                                    .foregroundColor(.white.opacity(0.85))
-
-                                if country.isTerritory {
-                                    Text("Territory")
-                                        .font(.caption2.weight(.bold))
-                                        .padding(.horizontal, 9)
-                                        .padding(.vertical, 3)
-                                        .background(Capsule().fill(Color.appTeal.opacity(0.3)))
-                                        .foregroundColor(.appTeal)
-                                }
-
-                                Spacer()
-
-                                if store.repeatLaterIds.contains(country.id) {
-                                    Label("Repeat Card", systemImage: "arrow.triangle.2.circlepath")
-                                        .font(.caption2.weight(.bold))
-                                        .padding(.horizontal, 9)
-                                        .padding(.vertical, 3)
-                                        .background(Capsule().fill(Color.orange.opacity(0.25)))
-                                        .foregroundColor(.orange)
-                                }
-                            }
-
-                            Text(country.flag)
-                                .font(.system(size: 52))
-                                .shadow(color: Color.black.opacity(0.3), radius: 6, x: 0, y: 3)
-
-                            VStack(spacing: 2) {
-                                Text("COUNTRY / TERRITORY")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.white.opacity(0.5))
-
-                                Text(country.name)
-                                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                            HStack(spacing: 5) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundColor(.red)
+                                Text("\(store.wrongAttempts)")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
                             }
-                            .padding(.bottom, 13)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(Capsule().fill(Color.white.opacity(0.08)))
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color.white.opacity(0.06))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                                )
-                        )
 
-                        // MARK: - Input Box & Submit Button
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack(spacing: 8) {
-                                Text(store.inputMode == .strictTyping
-                                     ? "Write the exact capital city:"
-                                     : "Type letters to see capitals:")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundColor(.white.opacity(0.75))
-                                    .lineLimit(1)
+                        // Left & Right Controls
+                        HStack {
+                            Button(action: {
+                                if store.activeMode == .custom {
+                                    store.openCustomList()
+                                } else {
+                                    store.returnToMenu()
+                                }
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .frame(width: 34, height: 34)
+                                    .background(Circle().fill(Color.white.opacity(0.1)))
+                                    .foregroundColor(.white)
+                            }
+                            .buttonStyle(PlainButtonStyle())
 
-                                Spacer()
+                            Spacer()
 
+                            if store.activeMode == .official || store.activeMode == .officialAndTerritories {
+                                // Continent Selector Button (Starts with "All", shows selected continent)
                                 Button(action: {
                                     HapticsHelper.impact(.light)
                                     withAnimation(.easeInOut(duration: 0.18)) {
-                                        store.inputMode = (store.inputMode == .strictTyping) ? .suggestions : .strictTyping
+                                        showContinentPicker = true
                                     }
                                 }) {
-                                    HStack(spacing: 5) {
-                                        Image(systemName: store.inputMode == .strictTyping ? "sparkles" : "eye.slash.fill")
-                                            .font(.system(size: 11, weight: .bold))
-                                        Text(store.inputMode == .strictTyping ? "Show Suggestions" : "Hide Suggestions")
+                                    HStack(spacing: 4) {
+                                        Text(store.selectedPlayContinent)
                                             .font(.system(size: 12, weight: .bold))
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.72)
+                                        Image(systemName: "chevron.down")
+                                            .font(.system(size: 9, weight: .bold))
                                     }
-                                    .padding(.horizontal, 11)
-                                    .padding(.vertical, 6)
-                                    .background(
-                                        Capsule()
-                                            .fill(store.inputMode == .strictTyping ? Color.blue.opacity(0.32) : Color.appCyan.opacity(0.25))
-                                    )
+                                    .padding(.horizontal, 10)
+                                    .frame(height: 34)
+                                    .frame(maxWidth: 94)
+                                    .background(Capsule().fill(Color.white.opacity(0.1)))
                                     .overlay(
-                                        Capsule()
-                                            .stroke(Color.appCyan.opacity(0.85), lineWidth: 1)
+                                        Capsule().stroke(
+                                            store.selectedPlayContinent == "All" ? Color.clear : Color.appCyan.opacity(0.7),
+                                            lineWidth: 1
+                                        )
                                     )
-                                    .foregroundColor(.white)
+                                    .foregroundColor(store.selectedPlayContinent == "All" ? .white : .appCyan)
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                            }
-
-                            HStack(spacing: 10) {
-                                HStack {
-                                    Image(systemName: "building.columns.fill")
-                                        .foregroundColor(.white.opacity(0.45))
-
-                                    AutoFocusTextField(
-                                        text: $store.typedText,
-                                        placeholder: "Enter capital city...",
-                                        isEditable: !store.submissionState.isSubmitted,
-                                        triggerKey: "\(country.id)-\(store.totalAttempts)-\(store.completedCount)-\(store.repeatQueuedCountTotal)",
-                                        onCommit: {
-                                            if !store.submissionState.isSubmitted {
-                                                store.submitAnswer()
-                                            }
-                                        }
+                            } else {
+                                // Custom Mode: Show countdown timer badge if active, or restart button
+                                if let remaining = store.remainingTimeSeconds {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "timer")
+                                            .font(.system(size: 12, weight: .bold))
+                                        Text("\(remaining)s")
+                                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .frame(height: 34)
+                                    .background(
+                                        Capsule().fill(remaining <= 3 ? Color.red.opacity(0.32) : Color.orange.opacity(0.24))
                                     )
-                                    .frame(height: 24)
+                                    .foregroundColor(remaining <= 3 ? .red : .orange)
+                                } else {
+                                    Button(action: {
+                                        store.restartCurrentMode()
+                                    }) {
+                                        Image(systemName: "arrow.counterclockwise")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .frame(width: 34, height: 34)
+                                            .background(Circle().fill(Color.white.opacity(0.1)))
+                                            .foregroundColor(.white)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                        }
+                    }
 
-                                    if !store.typedText.isEmpty && !store.submissionState.isSubmitted {
+                    // Progress Bar
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.white.opacity(0.1))
+                                .frame(height: 6)
+
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.appCyan, Color.blue],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: max(6, geo.size.width * CGFloat(store.roundProgressFraction)), height: 6)
+                                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: store.roundProgressFraction)
+                        }
+                    }
+                    .frame(height: 6)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 8)
+
+                // MARK: - Main Scrollable Quiz Area
+                ScrollView(showsIndicators: false) {
+                    if let country = store.currentCountry {
+                        VStack(spacing: 12) {
+                            // MARK: - Compact Country & Flag Card
+                            VStack(spacing: 6) {
+                                if country.isTerritory || store.repeatLaterIds.contains(country.id) {
+                                    HStack {
+                                        if country.isTerritory {
+                                            Text("Territory")
+                                                .font(.caption2.weight(.bold))
+                                                .padding(.horizontal, 9)
+                                                .padding(.vertical, 3)
+                                                .background(Capsule().fill(Color.appTeal.opacity(0.3)))
+                                                .foregroundColor(.appTeal)
+                                        }
+
+                                        Spacer()
+
+                                        if store.repeatLaterIds.contains(country.id) {
+                                            Label("Repeat Card", systemImage: "arrow.triangle.2.circlepath")
+                                                .font(.caption2.weight(.bold))
+                                                .padding(.horizontal, 9)
+                                                .padding(.vertical, 3)
+                                                .background(Capsule().fill(Color.orange.opacity(0.25)))
+                                                .foregroundColor(.orange)
+                                        }
+                                    }
+                                }
+
+                                Text(country.flag)
+                                    .font(.system(size: 52))
+                                    .shadow(color: Color.black.opacity(0.3), radius: 6, x: 0, y: 3)
+
+                                VStack(spacing: 2) {
+                                    Text("COUNTRY / TERRITORY")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white.opacity(0.5))
+
+                                    Text(country.name)
+                                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.center)
+
+                                    Text(country.continent)
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white.opacity(0.55))
+                                }
+                                .padding(.bottom, 13)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .fill(Color.white.opacity(0.06))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                    )
+                            )
+
+                            // MARK: - Input Box & Submit Button
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(spacing: 8) {
+                                    Text(store.inputMode == .strictTyping
+                                         ? "Write the exact capital city:"
+                                         : "Type letters to see capitals:")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundColor(.white.opacity(0.75))
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    if store.canToggleSuggestionsInGame {
                                         Button(action: {
-                                            store.typedText = ""
+                                            HapticsHelper.impact(.light)
+                                            withAnimation(.easeInOut(duration: 0.18)) {
+                                                store.inputMode = (store.inputMode == .strictTyping) ? .suggestions : .strictTyping
+                                            }
                                         }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(.white.opacity(0.45))
+                                            HStack(spacing: 5) {
+                                                Image(systemName: store.inputMode == .strictTyping ? "sparkles" : "eye.slash.fill")
+                                                    .font(.system(size: 11, weight: .bold))
+                                                Text(store.inputMode == .strictTyping ? "Show Suggestions" : "Hide Suggestions")
+                                                    .font(.system(size: 12, weight: .bold))
+                                            }
+                                            .padding(.horizontal, 11)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Capsule()
+                                                    .fill(store.inputMode == .strictTyping ? Color.blue.opacity(0.32) : Color.appCyan.opacity(0.25))
+                                            )
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(Color.appCyan.opacity(0.85), lineWidth: 1)
+                                            )
+                                            .foregroundColor(.white)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    } else {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: store.inputMode == .suggestions ? "sparkles" : "lock.fill")
+                                                .font(.system(size: 10, weight: .bold))
+                                            Text(store.inputMode == .suggestions ? "Suggestions On" : "No Suggestions")
+                                                .font(.system(size: 11, weight: .bold))
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background(Capsule().fill(Color.white.opacity(0.08)))
+                                        .foregroundColor(.appCyan)
+                                    }
+                                }
+
+                                HStack(spacing: 10) {
+                                    HStack {
+                                        Image(systemName: "building.columns.fill")
+                                            .foregroundColor(.white.opacity(0.45))
+
+                                        AutoFocusTextField(
+                                            text: $store.typedText,
+                                            placeholder: "Enter capital city...",
+                                            isEditable: !store.submissionState.isSubmitted && !showContinentPicker,
+                                            triggerKey: "\(country.id)-\(store.totalAttempts)-\(store.completedCount)-\(store.repeatQueuedCountTotal)-\(store.isRetypingCurrentCard)",
+                                            onCommit: {
+                                                if !store.submissionState.isSubmitted {
+                                                    store.submitAnswer()
+                                                }
+                                            }
+                                        )
+                                        .frame(height: 24)
+
+                                        if !store.typedText.isEmpty && !store.submissionState.isSubmitted {
+                                            Button(action: {
+                                                store.typedText = ""
+                                            }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundColor(.white.opacity(0.45))
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 13)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                            .fill(Color.white.opacity(0.08))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                    .stroke(borderColorForInputState, lineWidth: 1.5)
+                                            )
+                                    )
+
+                                    if !store.submissionState.isSubmitted {
+                                        Button(action: {
+                                            store.submitAnswer()
+                                        }) {
+                                            HStack(spacing: 4) {
+                                                Text("Check")
+                                                Image(systemName: "paperplane.fill")
+                                            }
+                                            .font(.system(size: 14, weight: .bold))
+                                            .padding(.horizontal, 13)
+                                            .padding(.vertical, 14)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                    .fill(
+                                                        store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                                        ? Color.white.opacity(0.12)
+                                                        : Color.blue
+                                                    )
+                                            )
+                                            .foregroundColor(.white)
+                                        }
+                                        .disabled(store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                        .buttonStyle(PlainButtonStyle())
+
+                                        // X Button to reveal answer directly without typing
+                                        Button(action: {
+                                            store.giveUpCurrentCard()
+                                        }) {
+                                            Image(systemName: "xmark")
+                                                .font(.system(size: 16, weight: .heavy))
+                                                .frame(width: 44, height: 46)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                        .fill(Color.red.opacity(0.22))
+                                                        .overlay(
+                                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                                .stroke(Color.red.opacity(0.65), lineWidth: 1.2)
+                                                        )
+                                                )
+                                                .foregroundColor(.red)
                                         }
                                         .buttonStyle(PlainButtonStyle())
                                     }
                                 }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 13)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .fill(Color.white.opacity(0.08))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                .stroke(borderColorForInputState, lineWidth: 1.5)
-                                        )
-                                )
 
-                                if !store.submissionState.isSubmitted {
-                                    Button(action: {
-                                        store.submitAnswer()
-                                    }) {
-                                        HStack(spacing: 4) {
-                                            Text("Check")
-                                            Image(systemName: "paperplane.fill")
-                                        }
-                                        .font(.system(size: 14, weight: .bold))
-                                        .padding(.horizontal, 13)
-                                        .padding(.vertical, 14)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                .fill(
-                                                    store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                                    ? Color.white.opacity(0.12)
-                                                    : Color.blue
-                                                )
-                                        )
-                                        .foregroundColor(.white)
-                                    }
-                                    .disabled(store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                    .buttonStyle(PlainButtonStyle())
+                                // MARK: - Live Autocomplete Suggestions (when InputMode == .suggestions)
+                                if store.inputMode == .suggestions && !store.submissionState.isSubmitted {
+                                    let suggestions = store.currentSuggestions
+                                    if !suggestions.isEmpty {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text("Matching Capitals (tap to select):")
+                                                .font(.caption2.weight(.bold))
+                                                .foregroundColor(.appCyan)
 
-                                    // X Button to reveal answer directly without typing
-                                    Button(action: {
-                                        store.giveUpCurrentCard()
-                                    }) {
-                                        Image(systemName: "xmark")
-                                            .font(.system(size: 16, weight: .heavy))
-                                            .frame(width: 44, height: 46)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                    .fill(Color.red.opacity(0.22))
-                                                    .overlay(
-                                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                                            .stroke(Color.red.opacity(0.65), lineWidth: 1.2)
-                                                    )
-                                            )
-                                            .foregroundColor(.red)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
-
-                            // MARK: - Live Autocomplete Suggestions (when InputMode == .suggestions)
-                            if store.inputMode == .suggestions && !store.submissionState.isSubmitted {
-                                let suggestions = store.currentSuggestions
-                                if !suggestions.isEmpty {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Matching Capitals (tap to select):")
-                                            .font(.caption2.weight(.bold))
-                                            .foregroundColor(.appCyan)
-
-                                        LazyVGrid(
-                                            columns: [
-                                                GridItem(.flexible(), spacing: 8),
-                                                GridItem(.flexible(), spacing: 8)
-                                            ],
-                                            spacing: 8
-                                        ) {
-                                            ForEach(suggestions, id: \.self) { suggestion in
-                                                Button(action: {
-                                                    store.submitAnswer(overrideText: suggestion)
-                                                }) {
-                                                    HStack(spacing: 6) {
-                                                        Image(systemName: "mappin.and.ellipse")
-                                                            .font(.caption)
-                                                            .foregroundColor(.appCyan)
-                                                        Text(suggestion)
-                                                            .font(.system(size: 14, weight: .semibold))
-                                                            .foregroundColor(.white)
-                                                            .lineLimit(1)
-                                                        Spacer(minLength: 0)
+                                            LazyVGrid(
+                                                columns: [
+                                                    GridItem(.flexible(), spacing: 8),
+                                                    GridItem(.flexible(), spacing: 8)
+                                                ],
+                                                spacing: 8
+                                            ) {
+                                                ForEach(suggestions, id: \.self) { suggestion in
+                                                    Button(action: {
+                                                        store.submitAnswer(overrideText: suggestion)
+                                                    }) {
+                                                        HStack(spacing: 6) {
+                                                            Image(systemName: "mappin.and.ellipse")
+                                                                .font(.caption)
+                                                                .foregroundColor(.appCyan)
+                                                            Text(suggestion)
+                                                                .font(.system(size: 14, weight: .semibold))
+                                                                .foregroundColor(.white)
+                                                                .lineLimit(1)
+                                                            Spacer(minLength: 0)
+                                                        }
+                                                        .padding(.horizontal, 12)
+                                                        .padding(.vertical, 10)
+                                                        .background(
+                                                            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                                                .fill(Color.blue.opacity(0.22))
+                                                                .overlay(
+                                                                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                                                        .stroke(Color.appCyan.opacity(0.45), lineWidth: 1)
+                                                                )
+                                                        )
                                                     }
-                                                    .padding(.horizontal, 12)
-                                                    .padding(.vertical, 10)
-                                                    .background(
-                                                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                                            .fill(Color.blue.opacity(0.22))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                                                    .stroke(Color.appCyan.opacity(0.45), lineWidth: 1)
-                                                            )
-                                                    )
+                                                    .buttonStyle(PlainButtonStyle())
                                                 }
-                                                .buttonStyle(PlainButtonStyle())
                                             }
                                         }
+                                        .padding(.top, 4)
+                                        .transition(.opacity.combined(with: .move(edge: .top)))
+                                    } else if !store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "magnifyingglass")
+                                                .foregroundColor(.orange)
+                                            Text("No capital starts with \"\(store.typedText)\"")
+                                                .font(.caption)
+                                                .foregroundColor(.orange)
+                                        }
+                                        .padding(.top, 2)
                                     }
-                                    .padding(.top, 4)
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
-                                } else if !store.typedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.orange)
-                                        Text("No capital starts with \"\(store.typedText)\"")
-                                            .font(.caption)
-                                            .foregroundColor(.orange)
-                                    }
-                                    .padding(.top, 2)
                                 }
                             }
-                        }
-                        .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                                )
-                        )
-
-                        // MARK: - Answer Feedback & Progression Buttons ("Repeat Later" vs "Next")
-                        if store.submissionState != .none {
-                            SubmissionFeedbackView(
-                                state: store.submissionState,
-                                onRetryTyping: {
-                                    store.retryTypingCurrentCard()
-                                },
-                                onRepeatLater: {
-                                    store.repeatLater()
-                                },
-                                onNext: {
-                                    store.nextCountry()
-                                }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    .fill(Color.white.opacity(0.05))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                    )
                             )
-                            .transition(.scale(scale: 0.96).combined(with: .opacity))
+
+                            // MARK: - Answer Feedback & Progression Buttons ("Repeat Later" vs "Next")
+                            if store.submissionState != .none {
+                                SubmissionFeedbackView(
+                                    state: store.submissionState,
+                                    onRetryTyping: {
+                                        store.retryTypingCurrentCard()
+                                    },
+                                    onRepeatLater: {
+                                        store.repeatLater()
+                                    },
+                                    onNext: {
+                                        store.nextCountry()
+                                    }
+                                )
+                                .transition(.scale(scale: 0.96).combined(with: .opacity))
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
+                    }
+                }
+            }
+
+            // MARK: - In-Game Continent Selector Modal (Official & Official + Territories)
+            if showContinentPicker {
+                Color.black.opacity(0.55)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            showContinentPicker = false
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 24)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Select Continent")
+                            .font(.system(size: 19, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                showContinentPicker = false
+                            }
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 13, weight: .bold))
+                                .frame(width: 30, height: 30)
+                                .background(Circle().fill(Color.white.opacity(0.12)))
+                                .foregroundColor(.white)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(.bottom, 4)
+
+                    ForEach(GameStore.allContinents, id: \.self) { continent in
+                        let isSelected = store.selectedPlayContinent == continent
+                        let count = store.countryCount(forContinent: continent, in: store.activeMode)
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                showContinentPicker = false
+                            }
+                            store.selectInGameContinent(continent)
+                        }) {
+                            HStack {
+                                Image(systemName: isSelected ? "checkmark.circle.fill" : "globe")
+                                    .foregroundColor(isSelected ? .appCyan : .white.opacity(0.45))
+                                Text(continent)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text("\(count)")
+                                    .font(.caption.weight(.bold))
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 4)
+                                    .background(Capsule().fill(Color.white.opacity(0.1)))
+                                    .foregroundColor(.appCyan)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(isSelected ? Color.blue.opacity(0.28) : Color.white.opacity(0.06))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(isSelected ? Color.appCyan.opacity(0.8) : Color.clear, lineWidth: 1)
+                                    )
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
+                .padding(18)
+                .background(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .fill(Color(red: 0.09, green: 0.12, blue: 0.21))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 24)
+                .transition(.scale(scale: 0.95).combined(with: .opacity))
             }
         }
     }

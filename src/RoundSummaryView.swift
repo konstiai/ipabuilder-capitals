@@ -153,11 +153,11 @@ struct RoundSummaryView: View {
 
                     if store.activeMode == .custom {
                         Button(action: {
-                            store.openCustomPicker()
+                            store.openCustomList()
                         }) {
                             HStack(spacing: 8) {
                                 Image(systemName: "checklist")
-                                Text("Add / Edit Custom Capitals")
+                                Text("Back to Custom Quizzes")
                             }
                             .font(.system(size: 16, weight: .bold))
                             .frame(maxWidth: .infinity)

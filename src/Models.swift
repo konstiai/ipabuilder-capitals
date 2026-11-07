@@ -26,7 +26,7 @@ enum GameMode: String, CaseIterable, Identifiable, Codable {
         case .officialAndTerritories:
             return "Includes territories like Guam, American Samoa, Puerto Rico & more"
         case .custom:
-            return "Pick and save specific countries & capitals to train only your selection"
+            return "Create and play your own custom capital quizzes"
         }
     }
 
@@ -87,8 +87,71 @@ enum InputMode: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+enum CustomSuggestionRule: String, CaseIterable, Identifiable, Codable {
+    case chooseInGame = "choose_in_game"
+    case withoutSuggestions = "without_suggestions"
+    case withSuggestions = "with_suggestions"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .chooseInGame:
+            return "Switchable In-Game"
+        case .withoutSuggestions:
+            return "Without Suggestions"
+        case .withSuggestions:
+            return "With Suggestions"
+        }
+    }
+
+    var shortLabel: String {
+        switch self {
+        case .chooseInGame:
+            return "In-Game Switch"
+        case .withoutSuggestions:
+            return "No Suggestions"
+        case .withSuggestions:
+            return "With Suggestions"
+        }
+    }
+}
+
+struct CustomQuizItem: Identifiable, Codable, Equatable {
+    var id: String
+    var name: String
+    var countryIds: [String]
+    var suggestionRule: CustomSuggestionRule
+    var timeLimitSeconds: Int? // nil = Unlimited
+    var lastAccuracy: Int?
+
+    init(
+        id: String = UUID().uuidString,
+        name: String,
+        countryIds: [String],
+        suggestionRule: CustomSuggestionRule = .chooseInGame,
+        timeLimitSeconds: Int? = nil,
+        lastAccuracy: Int? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.countryIds = countryIds
+        self.suggestionRule = suggestionRule
+        self.timeLimitSeconds = timeLimitSeconds
+        self.lastAccuracy = lastAccuracy
+    }
+
+    var timeLimitLabel: String {
+        if let seconds = timeLimitSeconds, seconds > 0 {
+            return "\(seconds)s / Country"
+        }
+        return "Unlimited Time"
+    }
+}
+
 enum AppScreen: Equatable {
     case menu
+    case customList
     case customPicker
     case playing
     case summary

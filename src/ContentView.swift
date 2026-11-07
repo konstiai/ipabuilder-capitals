@@ -20,6 +20,9 @@ struct ContentView: View {
             case .menu:
                 HomeMenuView()
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
+            case .customList:
+                CustomQuizListView()
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             case .customPicker:
                 CustomSelectionView()
                     .transition(.move(edge: .trailing).combined(with: .opacity))
