@@ -143,9 +143,9 @@ struct CustomQuizItem: Identifiable, Codable, Equatable {
 
     var timeLimitLabel: String {
         if let seconds = timeLimitSeconds, seconds > 0 {
-            return "\(seconds)s / Country"
+            return "\(seconds)s"
         }
-        return "Unlimited Time"
+        return "Unlimited"
     }
 }
 

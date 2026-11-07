@@ -89,37 +89,11 @@ struct CustomQuizListView: View {
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
-                        Text("Create your own custom training sets with specific countries, suggestion rules, and optional time limits per capital.")
+                        Text("Tap \"+ New\" at the top right to create your own custom training set with specific countries, suggestion rules, and optional time limits.")
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.65))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 34)
-
-                        Button(action: {
-                            store.startCreatingNewCustomQuiz()
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 18, weight: .bold))
-                                Text("Create New Custom Quiz")
-                                    .font(.system(size: 16, weight: .bold))
-                            }
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 15)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color.purple, Color.blue],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                            )
-                            .foregroundColor(.white)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.top, 6)
 
                         Spacer()
                     }
@@ -127,50 +101,25 @@ struct CustomQuizListView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 12) {
                             ForEach(store.customQuizzes) { quiz in
-                                HStack(spacing: 12) {
-                                    // Main tappable area to start playing the custom quiz
+                                VStack(alignment: .leading, spacing: 12) {
+                                    // Top Row: Tappable Quiz Title & Play Icon
                                     Button(action: {
                                         store.playCustomQuiz(quiz)
                                     }) {
                                         HStack(spacing: 12) {
                                             ZStack {
-                                                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                                RoundedRectangle(cornerRadius: 12, style: .continuous)
                                                     .fill(Color.purple.opacity(0.28))
-                                                    .frame(width: 46, height: 46)
+                                                    .frame(width: 40, height: 40)
                                                 Image(systemName: "play.fill")
-                                                    .font(.system(size: 18, weight: .bold))
+                                                    .font(.system(size: 16, weight: .bold))
                                                     .foregroundColor(.white)
                                             }
 
-                                            VStack(alignment: .leading, spacing: 5) {
-                                                Text(quiz.name)
-                                                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                                                    .foregroundColor(.white)
-                                                    .lineLimit(1)
-
-                                                HStack(spacing: 6) {
-                                                    Label("\(quiz.countryIds.count)", systemImage: "flag.fill")
-                                                        .font(.system(size: 11, weight: .semibold))
-                                                        .padding(.horizontal, 7)
-                                                        .padding(.vertical, 3)
-                                                        .background(Capsule().fill(Color.white.opacity(0.1)))
-                                                        .foregroundColor(.appCyan)
-
-                                                    Text(quiz.suggestionRule.shortLabel)
-                                                        .font(.system(size: 11, weight: .semibold))
-                                                        .padding(.horizontal, 7)
-                                                        .padding(.vertical, 3)
-                                                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                                                        .foregroundColor(.white.opacity(0.8))
-
-                                                    Label(quiz.timeLimitLabel, systemImage: "timer")
-                                                        .font(.system(size: 11, weight: .semibold))
-                                                        .padding(.horizontal, 7)
-                                                        .padding(.vertical, 3)
-                                                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                                                        .foregroundColor(.orange)
-                                                }
-                                            }
+                                            Text(quiz.name)
+                                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                                .foregroundColor(.white)
+                                                .lineLimit(1)
 
                                             Spacer(minLength: 0)
                                         }
@@ -178,20 +127,60 @@ struct CustomQuizListView: View {
                                     }
                                     .buttonStyle(PlainButtonStyle())
 
-                                    // Three dots menu button on the far right
-                                    Button(action: {
-                                        HapticsHelper.impact(.light)
-                                        withAnimation(.easeInOut(duration: 0.18)) {
-                                            activeMenuQuiz = quiz
+                                    // Bottom Row: Info Pills in one single line WITH the Three-Dots button on the right
+                                    HStack(spacing: 6) {
+                                        Button(action: {
+                                            store.playCustomQuiz(quiz)
+                                        }) {
+                                            HStack(spacing: 6) {
+                                                Label("\(quiz.countryIds.count)", systemImage: "flag.fill")
+                                                    .font(.system(size: 11, weight: .semibold))
+                                                    .lineLimit(1)
+                                                    .fixedSize(horizontal: true, vertical: false)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 5)
+                                                    .background(Capsule().fill(Color.white.opacity(0.1)))
+                                                    .foregroundColor(.appCyan)
+
+                                                Text(quiz.suggestionRule.shortLabel)
+                                                    .font(.system(size: 11, weight: .semibold))
+                                                    .lineLimit(1)
+                                                    .fixedSize(horizontal: true, vertical: false)
+                                                    .padding(.horizontal, 9)
+                                                    .padding(.vertical, 5)
+                                                    .background(Capsule().fill(Color.white.opacity(0.08)))
+                                                    .foregroundColor(.white.opacity(0.85))
+
+                                                Label(quiz.timeLimitLabel, systemImage: "timer")
+                                                    .font(.system(size: 11, weight: .semibold))
+                                                    .lineLimit(1)
+                                                    .fixedSize(horizontal: true, vertical: false)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 5)
+                                                    .background(Capsule().fill(Color.white.opacity(0.08)))
+                                                    .foregroundColor(.orange)
+
+                                                Spacer(minLength: 0)
+                                            }
+                                            .contentShape(Rectangle())
                                         }
-                                    }) {
-                                        Image(systemName: "ellipsis")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .frame(width: 38, height: 38)
-                                            .background(Circle().fill(Color.white.opacity(0.1)))
-                                            .foregroundColor(.white)
+                                        .buttonStyle(PlainButtonStyle())
+
+                                        // Three dots menu button aligned on the exact same line
+                                        Button(action: {
+                                            HapticsHelper.impact(.light)
+                                            withAnimation(.easeInOut(duration: 0.18)) {
+                                                activeMenuQuiz = quiz
+                                            }
+                                        }) {
+                                            Image(systemName: "ellipsis")
+                                                .font(.system(size: 15, weight: .bold))
+                                                .frame(width: 34, height: 30)
+                                                .background(Capsule().fill(Color.white.opacity(0.1)))
+                                                .foregroundColor(.white)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                                 .padding(14)
                                 .background(
@@ -203,30 +192,6 @@ struct CustomQuizListView: View {
                                         )
                                 )
                             }
-
-                            // Bottom "+ Create New Custom Quiz" button
-                            Button(action: {
-                                store.startCreatingNewCustomQuiz()
-                            }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "plus.circle.fill")
-                                    Text("Create New Custom Quiz")
-                                }
-                                .font(.system(size: 15, weight: .bold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 15)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(Color.purple.opacity(0.22))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                                .stroke(Color.purple.opacity(0.6), lineWidth: 1)
-                                        )
-                                )
-                                .foregroundColor(.white)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(.top, 4)
                         }
                         .padding(.horizontal, 16)
                         .padding(.bottom, 28)

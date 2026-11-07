@@ -74,11 +74,11 @@ struct HomeMenuView: View {
                         store.selectModeFromMenu(.officialAndTerritories)
                     }
 
-                    // Mode 3: Custom Selection (Same card style as Modes 1 & 2, showing count of Custom Quizzes)
+                    // Mode 3: Custom Selection (Same card style as Modes 1 & 2, showing only count of Custom Quizzes)
                     ModeCardView(
                         mode: .custom,
                         countLabel: customCountText,
-                        lastAccuracy: store.lastAccuracyByMode[GameMode.custom.rawValue]
+                        lastAccuracy: nil
                     ) {
                         store.selectModeFromMenu(.custom)
                     }
